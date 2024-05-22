@@ -61,12 +61,18 @@ class FHO_Parser:
         self.match("FECHA_CHAVES")
     #Corpo -> Atribuicao
     #Atribuicao -> id := Expressao_inicial ;
-    def Atribuicao(self):
+    def Atribuicao(self, onIf):
+            #Necessario ONIF pois em casos de else é necessario que o separadorCMD não exista
+            #E em casos de if sem begin e end, podemos utilizar ou não ";"
             self.match("IDENTIFICADOR")
             self.match("ATRIBUICAO")
             self.ExpressaoInicial()
-            self.match("SEPARADOR_CMD")
-    
+            if onIf == 'nao':
+                self.match("SEPARADOR_CMD")
+            elif onIf == 'double':
+                if self.lookAhead.type == "SEPARADOR_CMD":
+                    self.match("SEPARADOR_CMD")
+
     def Texto(self):
         self.lookAhead = self.l.proximoToken()
         while self.lookAhead.type != "ASPAS":
@@ -100,9 +106,9 @@ class FHO_Parser:
                 self.ExpressaoTexto()
     
     #INSTRUCAO -> Atribuicao | writeln(CORPO_WRITE) | readLn(id)
-    def Instrucao(self):
+    def Instrucao(self, onIf):
         if self.lookAhead.type == "IDENTIFICADOR":
-            self.Atribuicao()
+            self.Atribuicao(onIf)
         elif self.lookAhead.type == "PRINT":
             self.match("PRINT")
             self.match("ABRE_PARENTESES")
@@ -122,8 +128,27 @@ class FHO_Parser:
             self.IFElse()
             self.Corpo()
         if self.lookAhead.type == "IDENTIFICADOR":
-            self.Atribuicao()
+            self.Atribuicao('nao')
             self.Corpo()
+        if self.lookAhead.type == "REPETICAOFOR":
+            self.CorpoFor()
+    
+    # "for" IDENTIFICADOR ":=" FATOR "downto/to" FATOR do
+    def CorpoFor(self):
+        self.match("REPETICAOFOR")
+        self.match("IDENTIFICADOR")
+        self.match("ATRIBUICAO")
+        self.Fator()
+        self.match("UPORDOWN")
+        self.Fator()
+        self.match("DO")
+        if self.lookAhead.type == "ABRE_CHAVES":
+            self.match("ABRE_CHAVES")
+            self.Corpo()
+            self.match("FECHA_CHAVES")
+        else:
+            self.Instrucao('double')
+
 
     #Expressao Inicial -> Termo_Inicial Expressao
     def ExpressaoInicial(self):
@@ -221,7 +246,7 @@ class FHO_Parser:
             self.Corpo()
             self.match("FECHA_CHAVES")
         else:
-            self.Instrucao()
+            self.Instrucao('double')
         self.OnIf = True
         if self.lookAhead.type == "SENAO" and self.OnIf == True:
             self.match("SENAO")
@@ -231,7 +256,7 @@ class FHO_Parser:
                 self.Corpo()
                 self.match("FECHA_CHAVES")
             else : 
-                self.Instrucao()
+                self.Instrucao('double')
         if self.lookAhead.type == "SENAO" and self.OnIf != True:
             print("Nao e possivel iniciar else sem \"if\"\n"+self.lookAhead.value + "\nlinha: "
                   +str(self.lookAhead.lineno)+", coluna: "+str(self.lookAhead.lexpos))

@@ -4,7 +4,8 @@ from lex import lex
 #tokens
 tokens = ("INICIALIZADOR","QUALIFICADORVAR","QUALIFICADORCONST","ABRE_CHAVES","FECHA_CHAVES","REAL","SE","SENAO","ENTAO",
         "ATRIBUICAO","TIPO_DADO", "OPERADOR_ARITMETICO", "SEPARADOR_CMD", "CONSTANTE_INTEIRA", "OPERADOR_RELACIONAL", "ASPAS",
-          "ABRE_PARENTESES","FECHA_PARENTESES", "OPERADOR_LOGICO", "SEPARADOR","FLOAT", "TIPADOR","REPETICAOFOR","REPETICAOWHILE","LEITOR","PRINT","IDENTIFICADOR")
+          "ABRE_PARENTESES","FECHA_PARENTESES", "OPERADOR_LOGICO", "SEPARADOR","FLOAT", "TIPADOR","REPETICAOFOR","REPETICAOWHILE",
+          "LEITOR","PRINT","UPORDOWN","DO","IDENTIFICADOR")
 
 '''Alfabeto case insensitive
 (a|A)(b|B)(c|C)(d|D)(e|E)(f|F)(g|G)(h|H)(i|I)(j|J)(k|K)(l|L)(m|M)
@@ -47,7 +48,9 @@ t_OPERADOR_RELACIONAL = "<>|>=|<=|=|>|<"
 t_OPERADOR_LOGICO = "((a|A)(n|N)(d|D))|((n|N)(o|O)(t|T))|((o|O)(r|R))"
 t_SENAO = "((e|E)(l|L)(s|S)(e|E))"
 t_REPETICAOFOR = "((f|F)(o|O)(r|R))"
+t_UPORDOWN = "(d|D)(o|O)(w|W)(n|N)(t|T)(o|O)|(t|T)(o|O)"
 t_REPETICAOWHILE = "((w|W)(h|H)(i|I)(l|L)(e|E))"
+t_DO = "DO | Do | dO | do"
 
 '''Alfabeto case insensitive
 (a|A)(b|B)(c|C)(d|D)(e|E)(f|F)(g|G)(h|H)(i|I)(j|J)(k|K)(l|L)(m|M)
@@ -71,7 +74,7 @@ def t_error(t):
 
 #Instanciar o lex
 l = lex()
-arquivo = open("main.pascal","r")
+arquivo = open("Lexer\main.pascal","r")
 #definir o texto de entrada
 fita = arquivo.read()
 #Carregar o lex
